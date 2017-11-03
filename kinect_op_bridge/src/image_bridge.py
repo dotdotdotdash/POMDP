@@ -1,0 +1,84 @@
+#!/usr/bin/env python
+
+import rospy
+import cv2
+from sensor_msgs.msg import Image
+import numpy as np
+import dlib
+from cv_bridge import CvBridge, CvBridgeError
+
+bridge = CvBridge()
+detector = dlib.get_frontal_face_detector() #Face detector
+predictor = dlib.shape_predictor("/home/ubuntu/jetsonbot/src/kinect_op_bridge/src/shape_predictor_68_face_landmarks.dat")
+
+def transfer_image(data):
+    img_data = Image()
+    image = bridge.imgmsg_to_cv2(data, "bgr8")
+    image = cv2.resize(image,(300,200))
+    size = image.shape
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    clahe_image = clahe.apply(gray)
+
+    detections = detector(clahe_image, 1)
+    for k,d in enumerate(detections):
+        shape = predictor(clahe_image, d)
+        left,right = calculate_mean_distance(shape)
+        difference = left - right
+        if difference >= 0:
+            rospy.loginfo("looking at left screen")
+        else:
+            rospy.loginfo("looking at right screen")
+
+    cv2.imshow('test_window',image)
+    cv2.waitKey(1)
+
+def calculate_mean_distance(shape):
+    left_side = []
+    right_side = []
+    distance = 0
+    sum_left = 0
+    sum_right = 0
+    center = shape.part(30)
+    for i in range(0,68):
+        if i >= 0 and i<=7:
+            left_side.append(shape.part(i))
+        elif i >=9 and i <= 16:
+            right_side.append(shape.part(i))
+        elif i >= 17 and i <= 21:
+            left_side.append(shape.part(i))
+        elif i >=22 and i<= 26:
+            right_side.append(shape.part(i))
+        elif i >=36 and i<=41:
+            left_side.append(shape.part(i))
+        elif i >=42 and i<=47:
+            right_side.append(shape.part(i))
+
+    for data_point in left_side:
+        distance = np.sqrt((center.x-data_point.x)**2+(center.y-data_point.y)**2)
+        sum_left = sum_left + distance
+
+    for data_point in right_side:
+        distance = np.sqrt((center.x-data_point.x)**2+(center.y-data_point.y)**2)
+        sum_right = sum_right + distance
+
+    avg_left = sum_left/19
+    avg_right = sum_right/19
+    return avg_left,avg_right
+
+def get_image_from_kinect():
+    rospy.init_node('image_subscriber', anonymous=True)
+    rospy.Subscriber("/kinect2/hd/image_color", Image, transfer_image)
+    rospy.spin()
+
+if __name__ == '__main__':
+    get_image_from_kinect()
+
+
+
+
+
+
+
+
+
