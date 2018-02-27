@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 
-import rospy
+#import rospy
 import cv2
 #from sensor_msgs.msg import Image
 import numpy as np
 import dlib
 #from kinect_op_bridge.msg import Dataset
-from cv_bridge import CvBridge, CvBridgeError
+#from cv_bridge import CvBridge, CvBridgeError
 import time
 
-bridge = CvBridge()
+#bridge = CvBridge()
 detector = dlib.get_frontal_face_detector()
 
 # predictor = dlib.shape_predictor("/home/ubuntu/jetsonbot/src/kinect_op_bridge/src/shape_predictor_68_face_landmarks.dat")
 
-predictor = dlib.shape_predictor("/home/apg/kinect_op_bridge/src/shape_predictor_68_face_landmarks.dat")
+predictor = dlib.shape_predictor("C:/Users/venka/Documents/GitHub/POMDP/kinect_op_bridge/src/shape_predictor_68_face_landmarks.dat")
 
 cap = cv2.VideoCapture(0)
 #def transfer_image(data):
