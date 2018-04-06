@@ -5,7 +5,7 @@ import cv2
 from sensor_msgs.msg import Image
 import numpy as np
 import dlib
-# from kinect_op_bridge.msg import Dataset
+from kinect_op_bridge.msg import Dataset
 from cv_bridge import CvBridge, CvBridgeError
 import time
 
@@ -14,8 +14,8 @@ detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("/home/ubuntu/jetsonbot/src/kinect_op_bridge/src/shape_predictor_68_face_landmarks.dat")
 
 def transfer_image(data):
-#     pub = rospy.Publisher('dataset', Dataset, queue_size = 10)
-#     dataset = Dataset()
+    pub = rospy.Publisher('dataset', Dataset, queue_size = 10)
+    dataset = Dataset()
     img_data = Image()
     image = bridge.imgmsg_to_cv2(data, "bgr8")
     image = cv2.resize(image,(300,200))
@@ -27,19 +27,21 @@ def transfer_image(data):
     for k,d in enumerate(detections):
         shape = predictor(clahe_image, d)
         left,right = calculate_mean_distance(shape)
+        dataset.data_left = left
+        dataset.data_right = right
         difference = left - right
-#         dataset.data = difference
+        dataset.data = difference
         if difference >= -8:
             side = 1
             rospy.loginfo("User is focused")
         else:
             side = 0
             rospy.loginfo("User is distracted")
-#         dataset.side = side
+        dataset.side = side
 
     cv2.imshow('test_window',image)
-#     pub.publish(dataset)
-    time.sleep(1)
+    pub.publish(dataset)
+#    time.sleep(1)
     cv2.waitKey(1)
 
 def calculate_mean_distance(shape):
