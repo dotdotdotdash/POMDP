@@ -11,7 +11,7 @@ The datapoints extracted through perception is fed to the POMDP engine as an obs
 
 <img src="https://github.com/dotdotdotdash/POMDP/blob/master/POMDP%20engine.JPG"></img>
 
-#How to use the package ?
+# How to use the package ?
 Step - 1: Clone the package.
 Step - 2: Change the location of the shape_predictor_68_face_landmarks.dat file in image_bridge_opencv.py.
 Step - 3: Run the python script. You should be getting the estimated pose of the user.
