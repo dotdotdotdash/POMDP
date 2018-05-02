@@ -1,28 +1,18 @@
 #!/usr/bin/env python
 
-#import rospy
 import cv2
-#from sensor_msgs.msg import Image
 import numpy as np
 import dlib
-#from kinect_op_bridge.msg import Dataset
-#from cv_bridge import CvBridge, CvBridgeError
 import time
 
-#bridge = CvBridge()
 detector = dlib.get_frontal_face_detector()
 
-# predictor = dlib.shape_predictor("/home/ubuntu/jetsonbot/src/kinect_op_bridge/src/shape_predictor_68_face_landmarks.dat")
-
+# Change this accordingly to the location where you have the file.
 predictor = dlib.shape_predictor("C:/Users/venka/Documents/GitHub/POMDP/kinect_op_bridge/src/shape_predictor_68_face_landmarks.dat")
 
 cap = cv2.VideoCapture(0)
-#def transfer_image(data):
+
 def main_loop():
-    #pub = rospy.Publisher('dataset', Dataset, queue_size = 10)
-    #dataset = Dataset()
-    #img_data = Image()
-    #image = bridge.imgmsg_to_cv2(data, "bgr8")
     _,image = cap.read()
     image = cv2.resize(image,(300,200))
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -37,19 +27,15 @@ def main_loop():
 
         left,right = calculate_mean_distance(shape)
         difference = left - right
-
-        #dataset.data = difference
+	
         if difference >= -8:
             side = 1
             print("User is focused")
         else:
             side = 0
             print("User is distracted")
-        #dataset.side = side
 
     cv2.imshow('test_window',image)
-    #pub.publish(dataset)
-    #time.sleep(1)
     cv2.waitKey(1)
 
 def calculate_mean_distance(shape):
@@ -88,13 +74,7 @@ def calculate_mean_distance(shape):
     avg_right = sum_right/num_points
     return avg_left,avg_right
 
-def get_image_from_kinect():
-    rospy.init_node('image_subscriber', anonymous=True)
-    rospy.Subscriber("/kinect2/hd/image_color", Image, transfer_image)
-    rospy.spin()
-
 if __name__ == '__main__':
-    #get_image_from_kinect()
 	while True:
 		main_loop()
 
